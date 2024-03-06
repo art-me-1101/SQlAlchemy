@@ -4,13 +4,14 @@ import sqlalchemy
 from .db_session import SqlAlchemyBase
 
 
-class User(SqlAlchemyBase):
+class Jobs(SqlAlchemyBase):
     __tablename__ = 'jobs'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+    job = sqlalchemy.Column(sqlalchemy.String)
     team_leader = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     work_size = sqlalchemy.Column(sqlalchemy.Integer)
     collaborators = sqlalchemy.Column(sqlalchemy.String)
-    start_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+    start_date = sqlalchemy.Column(sqlalchemy.DateTime)
     end_date = sqlalchemy.Column(sqlalchemy.DateTime)
     is_finished = sqlalchemy.Column(sqlalchemy.Boolean)
