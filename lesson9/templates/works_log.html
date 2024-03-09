@@ -2,7 +2,7 @@
 
 {% block content %}
 <div><h2 style="text-align: center">Works log</h2></div>
-<div style="margin-left: 50px; margin-right:50px">
+
    {% for el in jobs %}
     <div>
         <h3>Action #{{ el.id }}</h3>
@@ -16,7 +16,7 @@
             </tr>
             <tr>
                 <td class="table-primary">{{ el.job }}</td>
-                <td class="table-primary">{{el.user.surname}} {{el.user.name}}</td>
+                <td class="table-primary">{{el.user.surname}} {{el.team_leader.name}}</td>
                 {% if el.work_size > 1 %}
                     <td class="table-primary">{{ el.work_size }} hours</td>
                 {% else %}
