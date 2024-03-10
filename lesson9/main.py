@@ -1,14 +1,17 @@
 from flask import Flask, render_template, redirect
+from flask_login import LoginManager
 from flask_login import login_user
 
 from data import db_session
 from data.jobs import Jobs
 from data.users import User
+from forms.login import LoginForm
 from forms.user import RegisterForm
-from lesson9.forms.login import LoginForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
 def main():
@@ -54,6 +57,12 @@ def register():
         db_sess.commit()
         return redirect('/')
     return render_template('register.html', title='Регистрация', form=form)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    db_sess = db_session.create_session()
+    return db_sess.query(User).get(user_id)
 
 
 @app.route('/login', methods=['GET', 'POST'])

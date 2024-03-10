@@ -4,3 +4,10 @@
     margin-left: 20px;
     margin-right: 30px;
 }
+.buttons {
+    margin-left: auto;
+    margin-right: 0;
+    width: 300px;
+    display: flex;
+    justify-content: space-around;
+}

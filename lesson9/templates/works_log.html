@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class='buttons'>
+                    {% if title == "Главная страница" %}
+                    {% if current_user.is_authenticated %}
+                        <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+                    {% else %}
+                        <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
+                        <a class="btn btn-success" href="/login">Войти</a>
+                    {% endif %}
+                    {% endif %}
+</div>
 <div><h2 style="text-align: center">Works log</h2></div>
 
    {% for el in jobs %}
