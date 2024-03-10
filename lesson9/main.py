@@ -1,13 +1,13 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request, abort
 from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user
 
 from data import db_session
 from data.jobs import Jobs
 from data.users import User
+from forms.job import JobForm
 from forms.login import LoginForm
 from forms.user import RegisterForm
-from forms.job import JobForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -105,6 +105,54 @@ def add_news():
         return redirect('/')
     return render_template('new_job.html', title='Добавление работу',
                            form=form)
+
+
+@app.route('/jobs/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_news(id):
+    form = JobForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        jobs = db_sess.query(Jobs).filter(Jobs.id == id).filter(
+            (Jobs.user == current_user) | (current_user.id == 1)).first()
+        if jobs:
+            form.title.data = jobs.job
+            form.work_size.data = jobs.work_size
+            form.collaborators.data = jobs.collaborators
+            form.is_finished.data = jobs.is_finished
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        jobs = db_sess.query(Jobs).filter(Jobs.id == id).filter(
+            (Jobs.user == current_user) | (current_user.id == 1)).first()
+        if jobs:
+            jobs.job = form.title.data
+            jobs.work_size = form.work_size.data
+            jobs.collaborators = form.collaborators.data
+            jobs.is_finished = form.is_finished.data
+            db_sess.commit()
+            return redirect('/')
+        else:
+            abort(404)
+    return render_template('new_job.html',
+                           title='Редактирование новости',
+                           form=form
+                           )
+
+
+@app.route('/jobs_delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+def news_delete(id):
+    db_sess = db_session.create_session()
+    jobs = db_sess.query(Jobs).filter(Jobs.id == id).filter(
+        (Jobs.user == current_user) | (current_user.id == 1)).first()
+    if jobs:
+        db_sess.delete(jobs)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect('/')
 
 
 if __name__ == '__main__':

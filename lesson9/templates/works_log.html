@@ -13,7 +13,7 @@
 <div><h2 style="text-align: center">Works log</h2></div>
 
 {% for el in jobs %}
-<div>
+<div style="margin-top: 50px">
     <h3>Action #{{ el.id }}</h3>
     <table class="table">
         <tr class="table-secondary">
@@ -39,6 +39,16 @@
             {% endif %}
         </tr>
     </table>
+    {% if current_user.is_authenticated and (current_user == el.user or current_user.id == 1) %}
+    <div>
+        <a href="/jobs/{{ el.id }}" class="btn btn-warning">
+            Изменить
+        </a>
+        <a href="/jobs_delete/{{ el.id }}" class="btn btn-danger">
+            Удалить
+        </a>
+    </div>
+    {% endif %}
 </div>
 {% endfor %}
 
