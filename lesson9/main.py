@@ -98,6 +98,7 @@ def add_news():
         jobs.job = form.title.data
         jobs.collaborators = form.collaborators.data
         jobs.work_size = form.work_size.data
+        jobs.is_finished = form.is_finished.data
         current_user.jobs.append(jobs)
         db_sess.merge(current_user)
         db_sess.commit()

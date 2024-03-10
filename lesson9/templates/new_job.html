@@ -30,6 +30,7 @@
             </p>
         {% endfor %}
     </p>
+    <p>{{ form.is_finished() }} {{ form.is_finished.label }}</p>
     <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
     {{message}}
 </form>
