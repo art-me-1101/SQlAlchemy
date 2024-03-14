@@ -1,41 +1,48 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class='buttons'>
-                    {% if current_user.is_authenticated %}
-                        <a href="make_job" class="btn btn-secondary" style="margin-right: 50px;">Добавить работу</a>
-                        <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
-                    {% else %}
-                        <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
-                        <a class="btn btn-success" href="/login">Войти</a>
-                    {% endif %}
-</div>
-<div><h2 style="text-align: center">Works log</h2></div>
+{% if current_user.is_authenticated %}
+    <div class='buttons'>
+        <a href="/depart_list" class="btn btn-secondary" style="margin-right: 50px;">К листу департаментов</a>
+        <a href="make_job" class="btn btn-secondary" style="margin-right: 50px;">Добавить работу</a>
+        <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+    </div>
+{% else %}
+    <div class='buttons1'>
+        <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
+        <a class="btn btn-success" href="/login">Войти</a>
+    </div>
+{% endif %}
+<div><h2 style="text-align: center; margin-top: 20px">Журнал работ</h2></div>
 
 {% for el in jobs %}
 <div style="margin-top: 50px">
-    <h3>Action #{{ el.id }}</h3>
+    <h3>Задание #{{ el.id }}</h3>
     <table class="table">
         <tr class="table-secondary">
-            <th>Title of activity</th>
-            <th>Team leader</th>
-            <th>Duration</th>
-            <th>List of collaborators</th>
-            <th>is finished</th>
+            <th>Название работы</th>
+            <th>Лидер команды</th>
+            <th>Длительность</th>
+            <th>Список помощников</th>
+            <th>Закончено ли</th>
         </tr>
         <tr>
             <td class="table-primary">{{ el.job }}</td>
-            <td class="table-primary">{{el.user.surname}} {{el.team_leader.name}}</td>
-            {% if el.work_size > 1 %}
-                <td class="table-primary">{{ el.work_size }} hours</td>
+            <td class="table-primary">{{el.user.surname}} {{el.user.name}}</td>
+            {% if el.work_size % 100 > 10 and el.work_size % 100 < 20 %}
+                <td class="table-primary">{{ el.work_size }} часов</td>
+            {% elif el.work_size % 10 == 1 %}
+                <td class="table-primary">{{ el.work_size }} час</td>
+            {% elif el.work_size % 10 in[2, 3, 4] %}
+                <td class="table-primary">{{ el.work_size }} часа</td>
             {% else %}
-                <td class="table-primary">{{ el.work_size }} hour</td>
+                <td class="table-primary">{{ el.work_size }} часов</td>
             {% endif %}
             <td class="table-primary">{{ el.collaborators }}</td>
             {% if el.is_finished %}
-                <td class="table-success">is finished</td>
+                <td class="table-success">Закончено</td>
             {% else %}
-                <td class="table-danger">is not finished</td>
+                <td class="table-danger">Не закончено</td>
             {% endif %}
         </tr>
     </table>

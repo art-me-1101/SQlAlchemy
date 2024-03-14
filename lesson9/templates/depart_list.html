@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if current_user.is_authenticated %}
+    <div class='buttons2'>
+        <a href="/" class="btn btn-secondary" style="margin-right: 50px;">К листу работ</a>
+        <a href="make_depart" class="btn btn-secondary" style="margin-right: 50px;">Добавить депертамент</a>
+        <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+    </div>
+{% else %}
+    <div class='buttons1'>
+        <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
+        <a class="btn btn-success" href="/login">Войти</a>
+    </div>
+{% endif %}
+<div><h2 style="text-align: center; margin-top: 20px">Журнал Департаментов</h2></div>
+
+{% for el in departs %}
+<div style="margin-top: 50px">
+    <h3>Задание #{{ el.id }}</h3>
+    <table class="table">
+        <tr class="table-secondary">
+            <th>Название департамента</th>
+            <th>Глава</th>
+            <th>Участники</th>
+            <th>Почта департамента</th>
+        </tr>
+        <tr>
+            <td class="table-primary">{{ el.title }}</td>
+            <td class="table-primary">{{el.user.surname}} {{el.user.name}}</td>
+            <td class="table-primary">{{ el.members }}</td>
+            <td class="table-primary">{{ el.email }}</td>
+        </tr>
+    </table>
+    {% if current_user.is_authenticated and (current_user == el.user or current_user.id == 1) %}
+    <div>
+        <a href="/depart/{{ el.id }}" class="btn btn-warning">
+            Изменить
+        </a>
+        <a href="/depart_delete/{{ el.id }}" class="btn btn-danger">
+            Удалить
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% endblock %}
