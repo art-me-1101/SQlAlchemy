@@ -7,5 +7,5 @@ blueprint = flask.Blueprint(
 )
 
 @blueprint.route('/api/job')
-def get_news():
+def get_job():
     return "Обработчик в job_api"

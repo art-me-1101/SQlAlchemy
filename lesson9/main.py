@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, abort, jsonify
+from flask import Flask, render_template, redirect, request, abort, jsonify, make_response
 from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user
 
@@ -18,6 +18,16 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
+
+@app.errorhandler(400)
+def bad_request(_):
+    return make_response(jsonify({'error': 'Bad Request'}), 400)
+
+
 def main():
     db_session.global_init("db/mars_explorer.db")
     app.register_blueprint(job_api.blueprint)
@@ -35,7 +45,6 @@ def index():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        print(form.age.data)
         if form.password.data != form.password_again.data:
             return render_template('register.html', title='Регистрация',
                                    form=form,
@@ -95,7 +104,7 @@ def logout():
 
 @app.route('/make_job', methods=['GET', 'POST'])
 @login_required
-def add_news():
+def add_jobs():
     form = JobForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
@@ -114,7 +123,7 @@ def add_news():
 
 @app.route('/jobs/<int:id>', methods=['GET', 'POST'])
 @login_required
-def edit_news(id):
+def edit_jobs(id):
     form = JobForm()
     if request.method == "GET":
         db_sess = db_session.create_session()
@@ -148,7 +157,7 @@ def edit_news(id):
 
 @app.route('/jobs_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
-def news_delete(id):
+def jobs_delete(id):
     db_sess = db_session.create_session()
     jobs = db_sess.query(Jobs).filter(Jobs.id == id).filter(
         (Jobs.user == current_user) | (current_user.id == 1)).first()
@@ -168,7 +177,6 @@ def add_depart():
         db_sess = db_session.create_session()
         depart = Department()
         depart.title = form.title.data
-        print(form.title.data)
         depart.members = form.members.data
         depart.email = form.email.data
         current_user.departments.append(depart)
@@ -235,13 +243,28 @@ def depart_delete(id):
 @blueprint.route('/api/jobs')
 def get_jobs():
     db_sess = db_session.create_session()
-    news = db_sess.query(Jobs).all()
+    jobs = db_sess.query(Jobs).all()
     return jsonify(
         {
             'news':
                 [item.to_dict(
                     only=('id', 'job', 'team_leader', 'work_size', 'collaborators', 'start_date', 'is_finished'))
-                 for item in news]
+                    for item in jobs]
+        }
+    )
+
+
+@blueprint.route('/api/jobs/<int:job_id>', methods=['GET'])
+def get_one_job(job_id):
+    db_sess = db_session.create_session()
+    jobs = db_sess.query(Jobs).get(job_id)
+    if not jobs:
+        return make_response(jsonify({'error': 'Not found'}), 404)
+    return jsonify(
+        {
+            'jobs':
+                jobs.to_dict(
+                    only=('id', 'job', 'team_leader', 'work_size', 'collaborators', 'start_date', 'is_finished'))
         }
     )
 
