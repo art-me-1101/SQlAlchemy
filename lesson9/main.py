@@ -1,9 +1,10 @@
-from flask import Flask, render_template, redirect, request, abort
+from flask import Flask, render_template, redirect, request, abort, jsonify
 from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user
 
-from data import db_session
+from data import db_session, job_api
 from data.departments import Department
+from data.job_api import blueprint
 from data.jobs import Jobs
 from data.users import User
 from forms.department import DepartForm
@@ -19,6 +20,7 @@ login_manager.init_app(app)
 
 def main():
     db_session.global_init("db/mars_explorer.db")
+    app.register_blueprint(job_api.blueprint)
     app.run()
 
 
@@ -228,6 +230,20 @@ def depart_delete(id):
     else:
         abort(404)
     return redirect('/depart_list')
+
+
+@blueprint.route('/api/jobs')
+def get_jobs():
+    db_sess = db_session.create_session()
+    news = db_sess.query(Jobs).all()
+    return jsonify(
+        {
+            'news':
+                [item.to_dict(
+                    only=('id', 'job', 'team_leader', 'work_size', 'collaborators', 'start_date', 'is_finished'))
+                 for item in news]
+        }
+    )
 
 
 if __name__ == '__main__':
