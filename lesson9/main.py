@@ -269,5 +269,25 @@ def get_one_job(job_id):
     )
 
 
+@blueprint.route('/api/jobs', methods=['POST'])
+def create_jobs():
+    if not request.json:
+        return make_response(jsonify({'error': 'Empty request'}), 400)
+    elif not all(key in request.json for key in
+                 ['job', 'team_leader', 'collaborators', 'work_size', 'is_finished']):
+        return make_response(jsonify({'error': 'Bad request'}), 400)
+    db_sess = db_session.create_session()
+    jobs = Jobs(
+        job=request.json['job'],
+        team_leader=request.json['team_leader'],
+        collaborators=request.json['collaborators'],
+        work_size=request.json['work_size'],
+        is_finished=request.json['is_finished']
+    )
+    db_sess.add(jobs)
+    db_sess.commit()
+    return redirect(f'http://localhost:5000/api/jobs/{jobs.id}')
+
+
 if __name__ == '__main__':
     main()
