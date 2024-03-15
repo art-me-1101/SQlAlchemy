@@ -17,5 +17,5 @@ class Jobs(SqlAlchemyBase, SerializerMixin):
     collaborators = sqlalchemy.Column(sqlalchemy.String)
     start_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now())
     end_date = sqlalchemy.Column(sqlalchemy.DateTime)
-    is_finished = sqlalchemy.Column(sqlalchemy.Boolean)
+    is_finished = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     user = orm.relationship('User')

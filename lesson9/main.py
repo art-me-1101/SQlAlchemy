@@ -1,8 +1,9 @@
 from flask import Flask, render_template, redirect, request, abort, jsonify, make_response
 from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user
+from flask_restful import Api
 
-from data import db_session, job_api
+from data import db_session
 from data.departments import Department
 from data.job_api import blueprint
 from data.jobs import Jobs
@@ -11,11 +12,16 @@ from forms.department import DepartForm
 from forms.job import JobForm
 from forms.login import LoginForm
 from forms.user import RegisterForm
+from data.jobs_resourse import JobsListResource, JobsResource
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
+api = Api(app)
+api.add_resource(JobsListResource, '/api/v2/jobs')
+
+api.add_resource(JobsResource, '/api/v2/jobs/<int:job_id>')
 
 
 @app.errorhandler(404)
@@ -30,7 +36,7 @@ def bad_request(_):
 
 def main():
     db_session.global_init("db/mars_explorer.db")
-    app.register_blueprint(job_api.blueprint)
+    app.register_blueprint(blueprint)
     app.run()
 
 
@@ -238,55 +244,6 @@ def depart_delete(id):
     else:
         abort(404)
     return redirect('/depart_list')
-
-
-@blueprint.route('/api/jobs')
-def get_jobs():
-    db_sess = db_session.create_session()
-    jobs = db_sess.query(Jobs).all()
-    return jsonify(
-        {
-            'news':
-                [item.to_dict(
-                    only=('id', 'job', 'team_leader', 'work_size', 'collaborators', 'start_date', 'is_finished'))
-                    for item in jobs]
-        }
-    )
-
-
-@blueprint.route('/api/jobs/<int:job_id>', methods=['GET'])
-def get_one_job(job_id):
-    db_sess = db_session.create_session()
-    jobs = db_sess.query(Jobs).get(job_id)
-    if not jobs:
-        return make_response(jsonify({'error': 'Not found'}), 404)
-    return jsonify(
-        {
-            'jobs':
-                jobs.to_dict(
-                    only=('id', 'job', 'team_leader', 'work_size', 'collaborators', 'start_date', 'is_finished'))
-        }
-    )
-
-
-@blueprint.route('/api/jobs', methods=['POST'])
-def create_jobs():
-    if not request.json:
-        return make_response(jsonify({'error': 'Empty request'}), 400)
-    elif not all(key in request.json for key in
-                 ['job', 'team_leader', 'collaborators', 'work_size', 'is_finished']):
-        return make_response(jsonify({'error': 'Bad request'}), 400)
-    db_sess = db_session.create_session()
-    jobs = Jobs(
-        job=request.json['job'],
-        team_leader=request.json['team_leader'],
-        collaborators=request.json['collaborators'],
-        work_size=request.json['work_size'],
-        is_finished=request.json['is_finished']
-    )
-    db_sess.add(jobs)
-    db_sess.commit()
-    return redirect(f'http://localhost:5000/api/jobs/{jobs.id}')
 
 
 if __name__ == '__main__':
